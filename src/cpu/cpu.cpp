@@ -37,8 +37,8 @@ void Cpu::executeSub(int rd, int rs1, int rs2) {
     advancePc();
 }
 
-void Cpu::executeAddi(int rd, int rs1, std::uint32_t immediate) {
-    const std::uint32_t result = Alu::add(registers.read(rs1), immediate);
+void Cpu::executeAddi(int rd, int rs1, std::int32_t immediate) {
+    const std::uint32_t result = Alu::add(registers.read(rs1), static_cast<std::uint32_t>(immediate));
     registers.write(rd, result);
     advancePc();
 }
@@ -59,9 +59,15 @@ void Cpu::execute(const Instruction& instruction) {
     }
 }
 
-void Cpu::run(const Program& program) {
+void Cpu::run(const Program& program, bool trace) {
     while (program.hasInstructionAt(pc)) {
-        execute(program.getInstructionAt(pc));
+        const Instruction& instruction = program.getInstructionAt(pc);
+
+        if (trace) {
+            std::cout << "pc " << pc << ": " << instruction.toString() << '\n';
+        }
+
+        execute(instruction);
     }
 }
 

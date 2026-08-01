@@ -2,6 +2,7 @@
 #define INSTRUCTION_INSTRUCTION_HPP
 
 #include <cstdint>
+#include <string>
 
 enum class Operation {
     ADD,
@@ -14,11 +15,13 @@ struct Instruction {
     int rd;
     int rs1;
     int rs2;
-    std::uint32_t immediate;
+    std::int32_t immediate;
 
     static Instruction add(int rd, int rs1, int rs2);
     static Instruction sub(int rd, int rs1, int rs2);
-    static Instruction addi(int rd, int rs1, std::uint32_t immediate);
+    static Instruction addi(int rd, int rs1, std::int32_t immediate);
+
+    std::string toString() const;
 };
 
 #endif

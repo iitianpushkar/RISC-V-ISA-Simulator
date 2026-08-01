@@ -22,9 +22,9 @@ public:
 
     void executeAdd(int rd, int rs1, int rs2);
     void executeSub(int rd, int rs1, int rs2);
-    void executeAddi(int rd, int rs1, std::uint32_t immediate);
+    void executeAddi(int rd, int rs1, std::int32_t immediate);
     void execute(const Instruction& instruction);
-    void run(const Program& program);
+    void run(const Program& program, bool trace = false);
 
     void dumpState() const;
 };

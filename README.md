@@ -8,6 +8,8 @@ Simulating RISC-V in C++ for my better understanding of c++ and computer archite
 - `src/alu/alu.cpp` implements arithmetic operations.
 - `include/cpu/cpu.hpp` declares the CPU state.
 - `src/cpu/cpu.cpp` implements CPU behavior such as program counter updates.
+- `include/decoder/decoder.hpp` declares machine-code decoding.
+- `src/decoder/decoder.cpp` decodes a small RV32I instruction subset.
 - `include/instruction/instruction.hpp` declares the temporary instruction model.
 - `src/instruction/instruction.cpp` implements instruction helper constructors.
 - `include/program/program.hpp` declares a simple instruction container.
@@ -26,14 +28,22 @@ Simulating RISC-V in C++ for my better understanding of c++ and computer archite
 ## Instruction notes
 
 - An instruction describes one operation the CPU should perform.
-- Right now instructions are created directly in C++ using helpers like `Instruction::add(...)`.
-- Later, a decoder can turn real machine-code bits into this same instruction structure.
+- `addi` uses a signed immediate, so values like `-5` are allowed.
+- The decoder turns real machine-code bits into this instruction structure.
+
+## Decoder notes
+
+- The decoder currently supports `add`, `sub`, and `addi`.
+- `add` and `sub` are R-type instructions.
+- `addi` is an I-type instruction with a signed 12-bit immediate.
+- Unsupported instruction words throw an error for now.
 
 ## Program notes
 
 - A program is a list of instructions stored in order.
 - The CPU uses `pc` as an address, so instruction `0` is at address `0`, instruction `1` is at address `4`, instruction `2` is at address `8`, and so on.
 - `Cpu::run(...)` keeps fetching and executing instructions until there is no instruction at the current `pc`.
+- Passing `true` to `Cpu::run(program, true)` enables a trace that prints each fetched instruction.
 
 ## ALU notes
 

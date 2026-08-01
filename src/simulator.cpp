@@ -1,6 +1,9 @@
 #include "cpu/cpu.hpp"
-#include "instruction/instruction.hpp"
+#include "decoder/decoder.hpp"
 #include "program/program.hpp"
+
+#include <iostream>
+#include <vector>
 
 int main() {
     Cpu cpu;
@@ -8,13 +11,18 @@ int main() {
     cpu.getRegisters().write(1, 10);
     cpu.getRegisters().write(2, 20);
 
-    const Program program({
-        Instruction::add(3, 1, 2),      // x3 = x1 + x2
-        Instruction::sub(4, 2, 1),      // x4 = x2 - x1
-        Instruction::addi(5, 1, 100)    // x5 = x1 + 100
-    });
+    const std::vector<std::uint32_t> machineCode = {
+        0x002081b3, // add x3, x1, x2
+        0x40110233, // sub x4, x2, x1
+        0x06408293, // addi x5, x1, 100
+        0xffb08313  // addi x6, x1, -5
+    };
 
-    cpu.run(program);
+    const Program program(Decoder::decodeProgram(machineCode));
+
+    cpu.run(program, true);
+
+    std::cout << '\n';
     cpu.dumpState();
 
     return 0;
