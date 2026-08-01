@@ -12,6 +12,8 @@ Simulating RISC-V in C++ for my better understanding of c++ and computer archite
 - `src/decoder/decoder.cpp` decodes a small RV32I instruction subset.
 - `include/instruction/instruction.hpp` declares the temporary instruction model.
 - `src/instruction/instruction.cpp` implements instruction helper constructors.
+- `include/memory/memory.hpp` declares simulated byte-addressed memory.
+- `src/memory/memory.cpp` implements 32-bit word memory reads and writes.
 - `include/program/program.hpp` declares a simple instruction container.
 - `src/program/program.cpp` implements instruction fetch by address.
 - `include/register/registers.hpp` declares the register file.
@@ -21,6 +23,7 @@ Simulating RISC-V in C++ for my better understanding of c++ and computer archite
 ## CPU notes
 
 - The CPU owns the register file.
+- The CPU owns simulated memory.
 - The CPU also stores the program counter, usually called `pc`.
 - In RV32I, normal instructions are 4 bytes, so the default `pc` step is `pc += 4`.
 - The CPU asks the ALU to perform arithmetic, then writes the result back to a register.
@@ -34,9 +37,18 @@ Simulating RISC-V in C++ for my better understanding of c++ and computer archite
 ## Decoder notes
 
 - The decoder currently supports `add`, `sub`, and `addi`.
+- It also supports `lw` and `sw` for 32-bit word memory access.
 - `add` and `sub` are R-type instructions.
 - `addi` is an I-type instruction with a signed 12-bit immediate.
+- `lw` is an I-type load instruction, and `sw` is an S-type store instruction.
 - Unsupported instruction words throw an error for now.
+
+## Memory notes
+
+- Memory is byte-addressed, meaning each address points to one byte.
+- `lw` loads 4 bytes from memory into a register.
+- `sw` stores 4 bytes from a register into memory.
+- For now, word addresses must be divisible by 4.
 
 ## Program notes
 

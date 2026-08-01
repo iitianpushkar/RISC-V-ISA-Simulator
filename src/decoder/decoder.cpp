@@ -42,6 +42,26 @@ Instruction Decoder::decode(std::uint32_t word) {
         }
     }
 
+    if (opcode == 0x03) {
+        const std::int32_t immediate = signExtend12(getBits(word, 20, 12));
+
+        if (funct3 == 0x2) {
+            return Instruction::lw(rd, rs1, immediate);
+        }
+    }
+
+    if (opcode == 0x23) {
+        const int rs2 = getBits(word, 20, 5);
+        const std::uint32_t immediateBits =
+            (static_cast<std::uint32_t>(getBits(word, 25, 7)) << 5)
+            | static_cast<std::uint32_t>(getBits(word, 7, 5));
+        const std::int32_t immediate = signExtend12(immediateBits);
+
+        if (funct3 == 0x2) {
+            return Instruction::sw(rs2, rs1, immediate);
+        }
+    }
+
     throw std::invalid_argument("unsupported instruction word");
 }
 

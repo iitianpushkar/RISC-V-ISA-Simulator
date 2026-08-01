@@ -2,7 +2,7 @@ CXX = clang++
 CXXFLAGS = -std=c++17 -Wall -Wextra -Iinclude
 
 TARGET = build/simulator
-SOURCES = src/simulator.cpp src/alu/alu.cpp src/cpu/cpu.cpp src/decoder/decoder.cpp src/instruction/instruction.cpp src/program/program.cpp src/register/registers.cpp
+SOURCES = src/simulator.cpp src/alu/alu.cpp src/cpu/cpu.cpp src/decoder/decoder.cpp src/instruction/instruction.cpp src/memory/memory.cpp src/program/program.cpp src/register/registers.cpp
 
 all: $(TARGET)
 

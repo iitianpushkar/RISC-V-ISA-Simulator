@@ -7,7 +7,9 @@
 enum class Operation {
     ADD,
     SUB,
-    ADDI
+    ADDI,
+    LW,
+    SW
 };
 
 struct Instruction {
@@ -20,6 +22,8 @@ struct Instruction {
     static Instruction add(int rd, int rs1, int rs2);
     static Instruction sub(int rd, int rs1, int rs2);
     static Instruction addi(int rd, int rs1, std::int32_t immediate);
+    static Instruction lw(int rd, int rs1, std::int32_t immediate);
+    static Instruction sw(int rs2, int rs1, std::int32_t immediate);
 
     std::string toString() const;
 };

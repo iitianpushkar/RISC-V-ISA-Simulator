@@ -13,6 +13,14 @@ const Registers& Cpu::getRegisters() const {
     return registers;
 }
 
+Memory& Cpu::getMemory() {
+    return memory;
+}
+
+const Memory& Cpu::getMemory() const {
+    return memory;
+}
+
 std::uint32_t Cpu::getPc() const {
     return pc;
 }
@@ -43,6 +51,18 @@ void Cpu::executeAddi(int rd, int rs1, std::int32_t immediate) {
     advancePc();
 }
 
+void Cpu::executeLw(int rd, int rs1, std::int32_t immediate) {
+    const std::uint32_t address = Alu::add(registers.read(rs1), static_cast<std::uint32_t>(immediate));
+    registers.write(rd, memory.readWord(address));
+    advancePc();
+}
+
+void Cpu::executeSw(int rs2, int rs1, std::int32_t immediate) {
+    const std::uint32_t address = Alu::add(registers.read(rs1), static_cast<std::uint32_t>(immediate));
+    memory.writeWord(address, registers.read(rs2));
+    advancePc();
+}
+
 void Cpu::execute(const Instruction& instruction) {
     switch (instruction.operation) {
         case Operation::ADD:
@@ -53,6 +73,12 @@ void Cpu::execute(const Instruction& instruction) {
             break;
         case Operation::ADDI:
             executeAddi(instruction.rd, instruction.rs1, instruction.immediate);
+            break;
+        case Operation::LW:
+            executeLw(instruction.rd, instruction.rs1, instruction.immediate);
+            break;
+        case Operation::SW:
+            executeSw(instruction.rs2, instruction.rs1, instruction.immediate);
             break;
         default:
             throw std::invalid_argument("unsupported instruction operation");
