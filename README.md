@@ -55,7 +55,7 @@ Simulating RISC-V in C++ for my better understanding of c++ and computer archite
 - A program is a list of instructions stored in order.
 - The CPU uses `pc` as an address, so instruction `0` is at address `0`, instruction `1` is at address `4`, instruction `2` is at address `8`, and so on.
 - `Cpu::run(...)` keeps fetching and executing instructions until there is no instruction at the current `pc`.
-- Passing `true` to `Cpu::run(program, true)` enables a trace that prints each fetched instruction.
+- Passing `true` to `Cpu::run(program, true)` enables a trace that prints each fetched instruction and its effect.
 
 ## ALU notes
 

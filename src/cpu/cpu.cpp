@@ -63,6 +63,66 @@ void Cpu::executeSw(int rs2, int rs1, std::int32_t immediate) {
     advancePc();
 }
 
+void Cpu::traceExecution(const Instruction& instruction) const {
+    std::cout << "pc " << pc << ": " << instruction.toString() << '\n';
+
+    switch (instruction.operation) {
+        case Operation::ADD: {
+            const std::uint32_t left = registers.read(instruction.rs1);
+            const std::uint32_t right = registers.read(instruction.rs2);
+            const std::uint32_t result = Alu::add(left, right);
+            std::cout << "  x" << instruction.rd << " = x" << instruction.rs1
+                      << "(" << left << ") + x" << instruction.rs2
+                      << "(" << right << ") = " << result << '\n';
+            break;
+        }
+        case Operation::SUB: {
+            const std::uint32_t left = registers.read(instruction.rs1);
+            const std::uint32_t right = registers.read(instruction.rs2);
+            const std::uint32_t result = Alu::subtract(left, right);
+            std::cout << "  x" << instruction.rd << " = x" << instruction.rs1
+                      << "(" << left << ") - x" << instruction.rs2
+                      << "(" << right << ") = " << result << '\n';
+            break;
+        }
+        case Operation::ADDI: {
+            const std::uint32_t left = registers.read(instruction.rs1);
+            const std::uint32_t result =
+                Alu::add(left, static_cast<std::uint32_t>(instruction.immediate));
+            std::cout << "  x" << instruction.rd << " = x" << instruction.rs1
+                      << "(" << left << ") + " << instruction.immediate
+                      << " = " << result << '\n';
+            break;
+        }
+        case Operation::LW: {
+            const std::uint32_t base = registers.read(instruction.rs1);
+            const std::uint32_t address =
+                Alu::add(base, static_cast<std::uint32_t>(instruction.immediate));
+            const std::uint32_t value = memory.readWord(address);
+            std::cout << "  address = x" << instruction.rs1 << "(" << base
+                      << ") + " << instruction.immediate << " = " << address << '\n';
+            std::cout << "  x" << instruction.rd << " = memory[" << address
+                      << "] = " << value << '\n';
+            break;
+        }
+        case Operation::SW: {
+            const std::uint32_t base = registers.read(instruction.rs1);
+            const std::uint32_t address =
+                Alu::add(base, static_cast<std::uint32_t>(instruction.immediate));
+            const std::uint32_t value = registers.read(instruction.rs2);
+            std::cout << "  address = x" << instruction.rs1 << "(" << base
+                      << ") + " << instruction.immediate << " = " << address << '\n';
+            std::cout << "  memory[" << address << "] = x" << instruction.rs2
+                      << "(" << value << ")" << '\n';
+            break;
+        }
+        default:
+            throw std::invalid_argument("unsupported instruction operation");
+    }
+
+    std::cout << "  pc -> " << pc + 4 << '\n';
+}
+
 void Cpu::execute(const Instruction& instruction) {
     switch (instruction.operation) {
         case Operation::ADD:
@@ -90,7 +150,7 @@ void Cpu::run(const Program& program, bool trace) {
         const Instruction& instruction = program.getInstructionAt(pc);
 
         if (trace) {
-            std::cout << "pc " << pc << ": " << instruction.toString() << '\n';
+            traceExecution(instruction);
         }
 
         execute(instruction);

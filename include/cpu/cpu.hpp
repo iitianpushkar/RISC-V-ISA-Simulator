@@ -14,6 +14,8 @@ private:
     Memory memory;
     std::uint32_t pc = 0;
 
+    void traceExecution(const Instruction& instruction) const;
+
 public:
     Registers& getRegisters();
     const Registers& getRegisters() const;
