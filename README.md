@@ -3,21 +3,14 @@ Simulating RISC-V in C++ for my better understanding of c++ and computer archite
 
 ## Current structure
 
-- `src/simulator.cpp` starts the simulator and connects the parts together.
-- `include/alu/alu.hpp` declares arithmetic operations.
-- `src/alu/alu.cpp` implements arithmetic operations.
-- `include/cpu/cpu.hpp` declares the CPU state.
-- `src/cpu/cpu.cpp` implements CPU behavior such as program counter updates.
-- `include/decoder/decoder.hpp` declares machine-code decoding.
-- `src/decoder/decoder.cpp` decodes a small RV32I instruction subset.
-- `include/instruction/instruction.hpp` declares the temporary instruction model.
-- `src/instruction/instruction.cpp` implements instruction helper constructors.
-- `include/memory/memory.hpp` declares simulated byte-addressed memory.
-- `src/memory/memory.cpp` implements 32-bit word memory reads and writes.
-- `include/program/program.hpp` declares a simple instruction container.
-- `src/program/program.cpp` implements instruction fetch by address.
-- `include/register/registers.hpp` declares the register file.
-- `src/register/registers.cpp` implements register read, write, and dump behavior.
+- `simulator.cpp` starts the simulator and connects the parts together.
+- `alu/` contains arithmetic operations.
+- `cpu/` contains CPU state and execution behavior.
+- `decoder/` contains machine-code decoding for the supported RV32I subset.
+- `instruction/` contains the internal instruction model.
+- `memory/` contains simulated byte-addressed memory.
+- `program/` contains instruction storage and fetch by address.
+- `register/` contains the register file.
 - `Makefile` builds and runs the project with simple commands.
 
 ## CPU notes
