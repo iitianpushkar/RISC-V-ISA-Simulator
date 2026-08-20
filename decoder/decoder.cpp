@@ -15,6 +15,14 @@ std::int32_t Decoder::signExtend12(std::uint32_t value) {
     return static_cast<std::int32_t>(value);
 }
 
+std::int32_t Decoder::signExtend13(std::uint32_t value) {
+    if ((value & 0x1000u) != 0) {
+        value |= 0xffffe000u;
+    }
+
+    return static_cast<std::int32_t>(value);
+}
+
 Instruction Decoder::decode(std::uint32_t word) {
     const int opcode = getBits(word, 0, 7);
     const int rd = getBits(word, 7, 5);
@@ -59,6 +67,24 @@ Instruction Decoder::decode(std::uint32_t word) {
 
         if (funct3 == 0x2) {
             return Instruction::sw(rs2, rs1, immediate);
+        }
+    }
+
+    if (opcode == 0x63) {
+        const int rs2 = getBits(word, 20, 5);
+        const std::uint32_t immediateBits =
+            (static_cast<std::uint32_t>(getBits(word, 31, 1)) << 12)
+            | (static_cast<std::uint32_t>(getBits(word, 7, 1)) << 11)
+            | (static_cast<std::uint32_t>(getBits(word, 25, 6)) << 5)
+            | (static_cast<std::uint32_t>(getBits(word, 8, 4)) << 1);
+        const std::int32_t immediate = signExtend13(immediateBits);
+
+        if (funct3 == 0x0) {
+            return Instruction::beq(rs1, rs2, immediate);
+        }
+
+        if (funct3 == 0x1) {
+            return Instruction::bne(rs1, rs2, immediate);
         }
     }
 

@@ -63,6 +63,24 @@ void Cpu::executeSw(int rs2, int rs1, std::int32_t immediate) {
     advancePc();
 }
 
+void Cpu::executeBeq(int rs1, int rs2, std::int32_t immediate) {
+    if (registers.read(rs1) == registers.read(rs2)) {
+        pc = static_cast<std::uint32_t>(static_cast<std::int32_t>(pc) + immediate);
+        return;
+    }
+
+    advancePc();
+}
+
+void Cpu::executeBne(int rs1, int rs2, std::int32_t immediate) {
+    if (registers.read(rs1) != registers.read(rs2)) {
+        pc = static_cast<std::uint32_t>(static_cast<std::int32_t>(pc) + immediate);
+        return;
+    }
+
+    advancePc();
+}
+
 void Cpu::traceExecution(const Instruction& instruction) const {
     std::cout << "pc " << pc << ": " << instruction.toString() << '\n';
 
@@ -116,6 +134,32 @@ void Cpu::traceExecution(const Instruction& instruction) const {
                       << "(" << value << ")" << '\n';
             break;
         }
+        case Operation::BEQ: {
+            const std::uint32_t left = registers.read(instruction.rs1);
+            const std::uint32_t right = registers.read(instruction.rs2);
+            const bool taken = left == right;
+            const std::uint32_t nextPc = taken
+                ? static_cast<std::uint32_t>(static_cast<std::int32_t>(pc) + instruction.immediate)
+                : pc + 4;
+            std::cout << "  compare x" << instruction.rs1 << "(" << left
+                      << ") == x" << instruction.rs2 << "(" << right
+                      << "): " << (taken ? "true" : "false") << '\n';
+            std::cout << "  pc -> " << nextPc << '\n';
+            return;
+        }
+        case Operation::BNE: {
+            const std::uint32_t left = registers.read(instruction.rs1);
+            const std::uint32_t right = registers.read(instruction.rs2);
+            const bool taken = left != right;
+            const std::uint32_t nextPc = taken
+                ? static_cast<std::uint32_t>(static_cast<std::int32_t>(pc) + instruction.immediate)
+                : pc + 4;
+            std::cout << "  compare x" << instruction.rs1 << "(" << left
+                      << ") != x" << instruction.rs2 << "(" << right
+                      << "): " << (taken ? "true" : "false") << '\n';
+            std::cout << "  pc -> " << nextPc << '\n';
+            return;
+        }
         default:
             throw std::invalid_argument("unsupported instruction operation");
     }
@@ -139,6 +183,12 @@ void Cpu::execute(const Instruction& instruction) {
             break;
         case Operation::SW:
             executeSw(instruction.rs2, instruction.rs1, instruction.immediate);
+            break;
+        case Operation::BEQ:
+            executeBeq(instruction.rs1, instruction.rs2, instruction.immediate);
+            break;
+        case Operation::BNE:
+            executeBne(instruction.rs1, instruction.rs2, instruction.immediate);
             break;
         default:
             throw std::invalid_argument("unsupported instruction operation");

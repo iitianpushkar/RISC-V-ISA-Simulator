@@ -29,11 +29,11 @@ Simulating RISC-V in C++ for my better understanding of c++ and computer archite
 
 ## Decoder notes
 
-- The decoder currently supports `add`, `sub`, and `addi`.
-- It also supports `lw` and `sw` for 32-bit word memory access.
+- The decoder currently supports `add`, `sub`, `addi`, `lw`, `sw`, `beq`, and `bne`.
 - `add` and `sub` are R-type instructions.
 - `addi` is an I-type instruction with a signed 12-bit immediate.
 - `lw` is an I-type load instruction, and `sw` is an S-type store instruction.
+- `beq` and `bne` are B-type branch instructions with signed offsets.
 - Unsupported instruction words throw an error for now.
 
 ## Memory notes

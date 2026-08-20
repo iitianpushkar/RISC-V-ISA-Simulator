@@ -18,7 +18,12 @@ int main() {
         0x06408293, // addi x5, x1, 100
         0xffb08313, // addi x6, x1, -5
         0x0053a023, // sw x5, 0(x7)
-        0x0003a403  // lw x8, 0(x7)
+        0x0003a403, // lw x8, 0(x7)
+        0x00108463, // beq x1, x1, 8
+        0x3e700493, // addi x9, x0, 999
+        0x00209463, // bne x1, x2, 8
+        0x30900513, // addi x10, x0, 777
+        0x07b00593  // addi x11, x0, 123
     };
 
     const Program program(Decoder::decodeProgram(machineCode));

@@ -23,6 +23,14 @@ Instruction Instruction::sw(int rs2, int rs1, std::int32_t immediate) {
     return {Operation::SW, 0, rs1, rs2, immediate};
 }
 
+Instruction Instruction::beq(int rs1, int rs2, std::int32_t immediate) {
+    return {Operation::BEQ, 0, rs1, rs2, immediate};
+}
+
+Instruction Instruction::bne(int rs1, int rs2, std::int32_t immediate) {
+    return {Operation::BNE, 0, rs1, rs2, immediate};
+}
+
 std::string Instruction::toString() const {
     std::ostringstream output;
 
@@ -41,6 +49,12 @@ std::string Instruction::toString() const {
             break;
         case Operation::SW:
             output << "sw x" << rs2 << ", " << immediate << "(x" << rs1 << ")";
+            break;
+        case Operation::BEQ:
+            output << "beq x" << rs1 << ", x" << rs2 << ", " << immediate;
+            break;
+        case Operation::BNE:
+            output << "bne x" << rs1 << ", x" << rs2 << ", " << immediate;
             break;
         default:
             throw std::invalid_argument("unsupported instruction operation");
