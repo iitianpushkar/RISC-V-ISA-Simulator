@@ -11,7 +11,9 @@ enum class Operation {
     LW,
     SW,
     BEQ,
-    BNE
+    BNE,
+    JAL,
+    JALR
 };
 
 struct Instruction {
@@ -28,6 +30,8 @@ struct Instruction {
     static Instruction sw(int rs2, int rs1, std::int32_t immediate);
     static Instruction beq(int rs1, int rs2, std::int32_t immediate);
     static Instruction bne(int rs1, int rs2, std::int32_t immediate);
+    static Instruction jal(int rd, std::int32_t immediate);
+    static Instruction jalr(int rd, int rs1, std::int32_t immediate);
 
     std::string toString() const;
 };

@@ -29,11 +29,13 @@ Simulating RISC-V in C++ for my better understanding of c++ and computer archite
 
 ## Decoder notes
 
-- The decoder currently supports `add`, `sub`, `addi`, `lw`, `sw`, `beq`, and `bne`.
+- The decoder currently supports `add`, `sub`, `addi`, `lw`, `sw`, `beq`, `bne`, `jal`, and `jalr`.
 - `add` and `sub` are R-type instructions.
 - `addi` is an I-type instruction with a signed 12-bit immediate.
 - `lw` is an I-type load instruction, and `sw` is an S-type store instruction.
 - `beq` and `bne` are B-type branch instructions with signed offsets.
+- `jal` is a J-type jump instruction that stores `pc + 4` in `rd`.
+- `jalr` is an I-type register jump that computes its target from `rs1 + immediate`.
 - Unsupported instruction words throw an error for now.
 
 ## Memory notes

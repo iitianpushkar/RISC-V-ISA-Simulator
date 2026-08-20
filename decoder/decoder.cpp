@@ -23,6 +23,14 @@ std::int32_t Decoder::signExtend13(std::uint32_t value) {
     return static_cast<std::int32_t>(value);
 }
 
+std::int32_t Decoder::signExtend21(std::uint32_t value) {
+    if ((value & 0x100000u) != 0) {
+        value |= 0xffe00000u;
+    }
+
+    return static_cast<std::int32_t>(value);
+}
+
 Instruction Decoder::decode(std::uint32_t word) {
     const int opcode = getBits(word, 0, 7);
     const int rd = getBits(word, 7, 5);
@@ -47,6 +55,14 @@ Instruction Decoder::decode(std::uint32_t word) {
 
         if (funct3 == 0x0) {
             return Instruction::addi(rd, rs1, immediate);
+        }
+    }
+
+    if (opcode == 0x67) {
+        const std::int32_t immediate = signExtend12(getBits(word, 20, 12));
+
+        if (funct3 == 0x0) {
+            return Instruction::jalr(rd, rs1, immediate);
         }
     }
 
@@ -86,6 +102,17 @@ Instruction Decoder::decode(std::uint32_t word) {
         if (funct3 == 0x1) {
             return Instruction::bne(rs1, rs2, immediate);
         }
+    }
+
+    if (opcode == 0x6f) {
+        const std::uint32_t immediateBits =
+            (static_cast<std::uint32_t>(getBits(word, 31, 1)) << 20)
+            | (static_cast<std::uint32_t>(getBits(word, 12, 8)) << 12)
+            | (static_cast<std::uint32_t>(getBits(word, 20, 1)) << 11)
+            | (static_cast<std::uint32_t>(getBits(word, 21, 10)) << 1);
+        const std::int32_t immediate = signExtend21(immediateBits);
+
+        return Instruction::jal(rd, immediate);
     }
 
     throw std::invalid_argument("unsupported instruction word");

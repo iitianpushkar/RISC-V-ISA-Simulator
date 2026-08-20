@@ -31,6 +31,14 @@ Instruction Instruction::bne(int rs1, int rs2, std::int32_t immediate) {
     return {Operation::BNE, 0, rs1, rs2, immediate};
 }
 
+Instruction Instruction::jal(int rd, std::int32_t immediate) {
+    return {Operation::JAL, rd, 0, 0, immediate};
+}
+
+Instruction Instruction::jalr(int rd, int rs1, std::int32_t immediate) {
+    return {Operation::JALR, rd, rs1, 0, immediate};
+}
+
 std::string Instruction::toString() const {
     std::ostringstream output;
 
@@ -55,6 +63,12 @@ std::string Instruction::toString() const {
             break;
         case Operation::BNE:
             output << "bne x" << rs1 << ", x" << rs2 << ", " << immediate;
+            break;
+        case Operation::JAL:
+            output << "jal x" << rd << ", " << immediate;
+            break;
+        case Operation::JALR:
+            output << "jalr x" << rd << ", " << immediate << "(x" << rs1 << ")";
             break;
         default:
             throw std::invalid_argument("unsupported instruction operation");

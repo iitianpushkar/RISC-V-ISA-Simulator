@@ -81,6 +81,20 @@ void Cpu::executeBne(int rs1, int rs2, std::int32_t immediate) {
     advancePc();
 }
 
+void Cpu::executeJal(int rd, std::int32_t immediate) {
+    const std::uint32_t returnAddress = pc + 4;
+    registers.write(rd, returnAddress);
+    pc = static_cast<std::uint32_t>(static_cast<std::int32_t>(pc) + immediate);
+}
+
+void Cpu::executeJalr(int rd, int rs1, std::int32_t immediate) {
+    const std::uint32_t returnAddress = pc + 4;
+    const std::uint32_t target =
+        Alu::add(registers.read(rs1), static_cast<std::uint32_t>(immediate)) & ~1u;
+    registers.write(rd, returnAddress);
+    pc = target;
+}
+
 void Cpu::traceExecution(const Instruction& instruction) const {
     std::cout << "pc " << pc << ": " << instruction.toString() << '\n';
 
@@ -160,6 +174,29 @@ void Cpu::traceExecution(const Instruction& instruction) const {
             std::cout << "  pc -> " << nextPc << '\n';
             return;
         }
+        case Operation::JAL: {
+            const std::uint32_t returnAddress = pc + 4;
+            const std::uint32_t nextPc =
+                static_cast<std::uint32_t>(static_cast<std::int32_t>(pc) + instruction.immediate);
+            std::cout << "  x" << instruction.rd << " = return address "
+                      << returnAddress << '\n';
+            std::cout << "  pc -> " << nextPc << '\n';
+            return;
+        }
+        case Operation::JALR: {
+            const std::uint32_t base = registers.read(instruction.rs1);
+            const std::uint32_t rawTarget =
+                Alu::add(base, static_cast<std::uint32_t>(instruction.immediate));
+            const std::uint32_t nextPc = rawTarget & ~1u;
+            const std::uint32_t returnAddress = pc + 4;
+            std::cout << "  x" << instruction.rd << " = return address "
+                      << returnAddress << '\n';
+            std::cout << "  target = (x" << instruction.rs1 << "(" << base
+                      << ") + " << instruction.immediate << ") & ~1 = "
+                      << nextPc << '\n';
+            std::cout << "  pc -> " << nextPc << '\n';
+            return;
+        }
         default:
             throw std::invalid_argument("unsupported instruction operation");
     }
@@ -189,6 +226,12 @@ void Cpu::execute(const Instruction& instruction) {
             break;
         case Operation::BNE:
             executeBne(instruction.rs1, instruction.rs2, instruction.immediate);
+            break;
+        case Operation::JAL:
+            executeJal(instruction.rd, instruction.immediate);
+            break;
+        case Operation::JALR:
+            executeJalr(instruction.rd, instruction.rs1, instruction.immediate);
             break;
         default:
             throw std::invalid_argument("unsupported instruction operation");
