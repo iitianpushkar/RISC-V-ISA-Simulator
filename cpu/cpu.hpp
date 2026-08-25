@@ -29,6 +29,12 @@ public:
     void executeAdd(int rd, int rs1, int rs2);
     void executeSub(int rd, int rs1, int rs2);
     void executeAddi(int rd, int rs1, std::int32_t immediate);
+    void executeAnd(int rd, int rs1, int rs2);
+    void executeOr(int rd, int rs1, int rs2);
+    void executeXor(int rd, int rs1, int rs2);
+    void executeAndi(int rd, int rs1, std::int32_t immediate);
+    void executeOri(int rd, int rs1, std::int32_t immediate);
+    void executeXori(int rd, int rs1, std::int32_t immediate);
     void executeLw(int rd, int rs1, std::int32_t immediate);
     void executeSw(int rs2, int rs1, std::int32_t immediate);
     void executeBeq(int rs1, int rs2, std::int32_t immediate);

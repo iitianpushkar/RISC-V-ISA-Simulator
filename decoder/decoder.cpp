@@ -48,6 +48,18 @@ Instruction Decoder::decode(std::uint32_t word) {
         if (funct3 == 0x0 && funct7 == 0x20) {
             return Instruction::sub(rd, rs1, rs2);
         }
+
+        if (funct3 == 0x7 && funct7 == 0x00) {
+            return Instruction::bitwiseAnd(rd, rs1, rs2);
+        }
+
+        if (funct3 == 0x6 && funct7 == 0x00) {
+            return Instruction::bitwiseOr(rd, rs1, rs2);
+        }
+
+        if (funct3 == 0x4 && funct7 == 0x00) {
+            return Instruction::bitwiseXor(rd, rs1, rs2);
+        }
     }
 
     if (opcode == 0x13) {
@@ -55,6 +67,18 @@ Instruction Decoder::decode(std::uint32_t word) {
 
         if (funct3 == 0x0) {
             return Instruction::addi(rd, rs1, immediate);
+        }
+
+        if (funct3 == 0x7) {
+            return Instruction::andi(rd, rs1, immediate);
+        }
+
+        if (funct3 == 0x6) {
+            return Instruction::ori(rd, rs1, immediate);
+        }
+
+        if (funct3 == 0x4) {
+            return Instruction::xori(rd, rs1, immediate);
         }
     }
 

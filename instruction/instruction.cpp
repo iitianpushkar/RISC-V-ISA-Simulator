@@ -15,6 +15,30 @@ Instruction Instruction::addi(int rd, int rs1, std::int32_t immediate) {
     return {Operation::ADDI, rd, rs1, 0, immediate};
 }
 
+Instruction Instruction::bitwiseAnd(int rd, int rs1, int rs2) {
+    return {Operation::AND, rd, rs1, rs2, 0};
+}
+
+Instruction Instruction::bitwiseOr(int rd, int rs1, int rs2) {
+    return {Operation::OR, rd, rs1, rs2, 0};
+}
+
+Instruction Instruction::bitwiseXor(int rd, int rs1, int rs2) {
+    return {Operation::XOR, rd, rs1, rs2, 0};
+}
+
+Instruction Instruction::andi(int rd, int rs1, std::int32_t immediate) {
+    return {Operation::ANDI, rd, rs1, 0, immediate};
+}
+
+Instruction Instruction::ori(int rd, int rs1, std::int32_t immediate) {
+    return {Operation::ORI, rd, rs1, 0, immediate};
+}
+
+Instruction Instruction::xori(int rd, int rs1, std::int32_t immediate) {
+    return {Operation::XORI, rd, rs1, 0, immediate};
+}
+
 Instruction Instruction::lw(int rd, int rs1, std::int32_t immediate) {
     return {Operation::LW, rd, rs1, 0, immediate};
 }
@@ -51,6 +75,24 @@ std::string Instruction::toString() const {
             break;
         case Operation::ADDI:
             output << "addi x" << rd << ", x" << rs1 << ", " << immediate;
+            break;
+        case Operation::AND:
+            output << "and x" << rd << ", x" << rs1 << ", x" << rs2;
+            break;
+        case Operation::OR:
+            output << "or x" << rd << ", x" << rs1 << ", x" << rs2;
+            break;
+        case Operation::XOR:
+            output << "xor x" << rd << ", x" << rs1 << ", x" << rs2;
+            break;
+        case Operation::ANDI:
+            output << "andi x" << rd << ", x" << rs1 << ", " << immediate;
+            break;
+        case Operation::ORI:
+            output << "ori x" << rd << ", x" << rs1 << ", " << immediate;
+            break;
+        case Operation::XORI:
+            output << "xori x" << rd << ", x" << rs1 << ", " << immediate;
             break;
         case Operation::LW:
             output << "lw x" << rd << ", " << immediate << "(x" << rs1 << ")";

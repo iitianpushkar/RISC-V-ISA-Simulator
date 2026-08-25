@@ -30,7 +30,14 @@ int main() {
         0x04400793, // addi x15, x0, 68
         0x00078867, // jalr x16, 0(x15)
         0x3e700893, // addi x17, x0, 999
-        0x0de00913  // addi x18, x0, 222
+        0x0de00913, // addi x18, x0, 222
+        0x0020fbb3, // and x23, x1, x2
+        0x0020ec33, // or x24, x1, x2
+        0x0020ccb3, // xor x25, x1, x2
+        0x00c00993, // addi x19, x0, 12
+        0x00a9fa13, // andi x20, x19, 10
+        0x0039ea93, // ori x21, x19, 3
+        0x00a9cb13  // xori x22, x19, 10
     };
 
     const Program program(Decoder::decodeProgram(machineCode));

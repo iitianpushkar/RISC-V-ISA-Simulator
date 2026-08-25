@@ -51,6 +51,45 @@ void Cpu::executeAddi(int rd, int rs1, std::int32_t immediate) {
     advancePc();
 }
 
+void Cpu::executeAnd(int rd, int rs1, int rs2) {
+    const std::uint32_t result = Alu::bitwiseAnd(registers.read(rs1), registers.read(rs2));
+    registers.write(rd, result);
+    advancePc();
+}
+
+void Cpu::executeOr(int rd, int rs1, int rs2) {
+    const std::uint32_t result = Alu::bitwiseOr(registers.read(rs1), registers.read(rs2));
+    registers.write(rd, result);
+    advancePc();
+}
+
+void Cpu::executeXor(int rd, int rs1, int rs2) {
+    const std::uint32_t result = Alu::bitwiseXor(registers.read(rs1), registers.read(rs2));
+    registers.write(rd, result);
+    advancePc();
+}
+
+void Cpu::executeAndi(int rd, int rs1, std::int32_t immediate) {
+    const std::uint32_t result =
+        Alu::bitwiseAnd(registers.read(rs1), static_cast<std::uint32_t>(immediate));
+    registers.write(rd, result);
+    advancePc();
+}
+
+void Cpu::executeOri(int rd, int rs1, std::int32_t immediate) {
+    const std::uint32_t result =
+        Alu::bitwiseOr(registers.read(rs1), static_cast<std::uint32_t>(immediate));
+    registers.write(rd, result);
+    advancePc();
+}
+
+void Cpu::executeXori(int rd, int rs1, std::int32_t immediate) {
+    const std::uint32_t result =
+        Alu::bitwiseXor(registers.read(rs1), static_cast<std::uint32_t>(immediate));
+    registers.write(rd, result);
+    advancePc();
+}
+
 void Cpu::executeLw(int rd, int rs1, std::int32_t immediate) {
     const std::uint32_t address = Alu::add(registers.read(rs1), static_cast<std::uint32_t>(immediate));
     registers.write(rd, memory.readWord(address));
@@ -123,6 +162,60 @@ void Cpu::traceExecution(const Instruction& instruction) const {
                 Alu::add(left, static_cast<std::uint32_t>(instruction.immediate));
             std::cout << "  x" << instruction.rd << " = x" << instruction.rs1
                       << "(" << left << ") + " << instruction.immediate
+                      << " = " << result << '\n';
+            break;
+        }
+        case Operation::AND: {
+            const std::uint32_t left = registers.read(instruction.rs1);
+            const std::uint32_t right = registers.read(instruction.rs2);
+            const std::uint32_t result = Alu::bitwiseAnd(left, right);
+            std::cout << "  x" << instruction.rd << " = x" << instruction.rs1
+                      << "(" << left << ") & x" << instruction.rs2
+                      << "(" << right << ") = " << result << '\n';
+            break;
+        }
+        case Operation::OR: {
+            const std::uint32_t left = registers.read(instruction.rs1);
+            const std::uint32_t right = registers.read(instruction.rs2);
+            const std::uint32_t result = Alu::bitwiseOr(left, right);
+            std::cout << "  x" << instruction.rd << " = x" << instruction.rs1
+                      << "(" << left << ") | x" << instruction.rs2
+                      << "(" << right << ") = " << result << '\n';
+            break;
+        }
+        case Operation::XOR: {
+            const std::uint32_t left = registers.read(instruction.rs1);
+            const std::uint32_t right = registers.read(instruction.rs2);
+            const std::uint32_t result = Alu::bitwiseXor(left, right);
+            std::cout << "  x" << instruction.rd << " = x" << instruction.rs1
+                      << "(" << left << ") ^ x" << instruction.rs2
+                      << "(" << right << ") = " << result << '\n';
+            break;
+        }
+        case Operation::ANDI: {
+            const std::uint32_t left = registers.read(instruction.rs1);
+            const std::uint32_t result =
+                Alu::bitwiseAnd(left, static_cast<std::uint32_t>(instruction.immediate));
+            std::cout << "  x" << instruction.rd << " = x" << instruction.rs1
+                      << "(" << left << ") & " << instruction.immediate
+                      << " = " << result << '\n';
+            break;
+        }
+        case Operation::ORI: {
+            const std::uint32_t left = registers.read(instruction.rs1);
+            const std::uint32_t result =
+                Alu::bitwiseOr(left, static_cast<std::uint32_t>(instruction.immediate));
+            std::cout << "  x" << instruction.rd << " = x" << instruction.rs1
+                      << "(" << left << ") | " << instruction.immediate
+                      << " = " << result << '\n';
+            break;
+        }
+        case Operation::XORI: {
+            const std::uint32_t left = registers.read(instruction.rs1);
+            const std::uint32_t result =
+                Alu::bitwiseXor(left, static_cast<std::uint32_t>(instruction.immediate));
+            std::cout << "  x" << instruction.rd << " = x" << instruction.rs1
+                      << "(" << left << ") ^ " << instruction.immediate
                       << " = " << result << '\n';
             break;
         }
@@ -214,6 +307,24 @@ void Cpu::execute(const Instruction& instruction) {
             break;
         case Operation::ADDI:
             executeAddi(instruction.rd, instruction.rs1, instruction.immediate);
+            break;
+        case Operation::AND:
+            executeAnd(instruction.rd, instruction.rs1, instruction.rs2);
+            break;
+        case Operation::OR:
+            executeOr(instruction.rd, instruction.rs1, instruction.rs2);
+            break;
+        case Operation::XOR:
+            executeXor(instruction.rd, instruction.rs1, instruction.rs2);
+            break;
+        case Operation::ANDI:
+            executeAndi(instruction.rd, instruction.rs1, instruction.immediate);
+            break;
+        case Operation::ORI:
+            executeOri(instruction.rd, instruction.rs1, instruction.immediate);
+            break;
+        case Operation::XORI:
+            executeXori(instruction.rd, instruction.rs1, instruction.immediate);
             break;
         case Operation::LW:
             executeLw(instruction.rd, instruction.rs1, instruction.immediate);
