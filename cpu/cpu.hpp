@@ -7,6 +7,27 @@
 #include "register/registers.hpp"
 
 #include <cstdint>
+#include <string>
+
+struct ExecutionResult {
+    std::uint32_t oldPc = 0;
+    std::uint32_t nextPc = 0;
+
+    bool regWritten = false;
+    int writtenRegister = 0;
+    std::uint32_t writtenValue = 0;
+
+    bool memoryRead = false;
+    bool memoryWritten = false;
+    std::uint32_t memoryAddress = 0;
+    std::uint32_t memoryValue = 0;
+
+    bool branchTaken = false;
+
+    std::string executeStage;
+    std::string memoryStage = "no memory access";
+    std::string writeBackStage = "no register write";
+};
 
 class Cpu {
 private:
@@ -14,7 +35,8 @@ private:
     Memory memory;
     std::uint32_t pc = 0;
 
-    void traceExecution(const Instruction& instruction) const;
+    void traceExecution(const Instruction& instruction,
+                        const ExecutionResult& result) const;
 
 public:
     Registers& getRegisters();
@@ -26,22 +48,7 @@ public:
     void setPc(std::uint32_t value);
     void advancePc();
 
-    void executeAdd(int rd, int rs1, int rs2);
-    void executeSub(int rd, int rs1, int rs2);
-    void executeAddi(int rd, int rs1, std::int32_t immediate);
-    void executeAnd(int rd, int rs1, int rs2);
-    void executeOr(int rd, int rs1, int rs2);
-    void executeXor(int rd, int rs1, int rs2);
-    void executeAndi(int rd, int rs1, std::int32_t immediate);
-    void executeOri(int rd, int rs1, std::int32_t immediate);
-    void executeXori(int rd, int rs1, std::int32_t immediate);
-    void executeLw(int rd, int rs1, std::int32_t immediate);
-    void executeSw(int rs2, int rs1, std::int32_t immediate);
-    void executeBeq(int rs1, int rs2, std::int32_t immediate);
-    void executeBne(int rs1, int rs2, std::int32_t immediate);
-    void executeJal(int rd, std::int32_t immediate);
-    void executeJalr(int rd, int rs1, std::int32_t immediate);
-    void execute(const Instruction& instruction);
+    ExecutionResult execute(const Instruction& instruction);
     void run(const Program& program, bool trace = false);
 
     void dumpState() const;

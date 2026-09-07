@@ -59,6 +59,7 @@ flowchart TD
 - `MEM` reads or writes memory for load/store instructions.
 - `WB` writes the final result back to a register when needed.
 - `PC` updates the program counter for the next instruction.
+- Each executed instruction produces an `ExecutionResult`, which stores the important datapath outputs used by the trace.
 
 ## Instruction notes
 
