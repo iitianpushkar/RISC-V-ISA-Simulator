@@ -3,7 +3,7 @@ Simulating RISC-V in C++ for my better understanding of c++ and computer archite
 
 ## Current structure
 
-- `simulator.cpp` starts the simulator and connects the parts together.
+- `driver.cpp` starts the simulator and connects the parts together.
 - `alu/` contains arithmetic operations.
 - `control/` contains single-cycle control signal generation.
 - `cpu/` contains CPU state and execution behavior.
@@ -20,7 +20,7 @@ Simulating RISC-V in C++ for my better understanding of c++ and computer archite
 
 ```mermaid
 flowchart TD
-    A["simulator.cpp"] --> B["ProgramLoader"]
+    A["driver.cpp"] --> B["ProgramLoader"]
     N["Machine-code file"] --> B
     B --> C["Decoder"]
     C --> D["Instruction objects"]
@@ -87,7 +87,13 @@ flowchart TD
 
 - `ProgramLoader` reads one hexadecimal 32-bit instruction from each non-empty line.
 - It produces raw machine-code words; decoding remains the decoder's responsibility.
-- The simulator currently loads `examples/basic_program.txt`.
+- The driver receives the program file path and passes it to the loader.
+
+## Driver notes
+
+- `driver.cpp` is the driver because it connects the loader, decoder, program, and CPU.
+- It catches errors from these components and displays them without abruptly terminating.
+- The simulator expects one program file path as a command-line argument.
 
 ## Memory notes
 
@@ -119,6 +125,18 @@ flowchart TD
 ```bash
 make
 make run
+```
+
+`make run` uses `examples/basic_program.txt` by default. To run another program:
+
+```bash
+make run PROGRAM=path/to/program.txt
+```
+
+You can also run the executable directly:
+
+```bash
+./build/simulator examples/basic_program.txt
 ```
 
 To remove generated build files:
