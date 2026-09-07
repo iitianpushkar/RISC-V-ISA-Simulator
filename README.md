@@ -22,16 +22,16 @@ Simulating RISC-V in C++ for my better understanding of c++ and computer archite
 flowchart TD
     A["driver.cpp"] --> B["ProgramLoader"]
     N["Machine-code file"] --> B
-    B --> C["Decoder"]
-    C --> D["Instruction objects"]
-    D --> E["Program"]
+    B --> E["Program with raw instruction words"]
     A --> F["Cpu"]
     F --> G["Registers"]
     F --> H["Memory"]
     F --> I["Program counter (pc)"]
-    F --> J["Fetch instruction using pc"]
+    F --> J["Fetch instruction word using pc"]
     E --> J
-    J --> M["Control Unit"]
+    J --> C["Decoder"]
+    C --> D["Instruction object"]
+    D --> M["Control Unit"]
     M --> K["Cpu::execute"]
     K --> L["Alu"]
     K --> G
@@ -73,6 +73,7 @@ flowchart TD
 ## Decoder notes
 
 - The decoder currently supports `add`, `sub`, `addi`, `and`, `or`, `xor`, `andi`, `ori`, `xori`, `lw`, `sw`, `beq`, `bne`, `jal`, and `jalr`.
+- The CPU calls the decoder after fetching one raw instruction word from the program.
 - `add` and `sub` are R-type instructions.
 - `addi` is an I-type instruction with a signed 12-bit immediate.
 - `and`, `or`, and `xor` are R-type logical instructions.
@@ -91,7 +92,7 @@ flowchart TD
 
 ## Driver notes
 
-- `driver.cpp` is the driver because it connects the loader, decoder, program, and CPU.
+- `driver.cpp` is the driver because it connects the loader, program, and CPU.
 - It catches errors from these components and displays them without abruptly terminating.
 - The simulator expects one program file path as a command-line argument.
 
@@ -104,8 +105,8 @@ flowchart TD
 
 ## Program notes
 
-- A program is a list of instructions stored in order.
-- The CPU uses `pc` as an address, so instruction `0` is at address `0`, instruction `1` is at address `4`, instruction `2` is at address `8`, and so on.
+- A program stores raw 32-bit machine-code words in order.
+- The CPU uses `pc` as an address, so word `0` is at address `0`, word `1` is at address `4`, word `2` is at address `8`, and so on.
 - `Cpu::run(...)` keeps fetching and executing instructions until there is no instruction at the current `pc`.
 - Passing `true` to `Cpu::run(program, true)` enables a trace that prints each fetched instruction and its effect.
 

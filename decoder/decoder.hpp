@@ -4,7 +4,6 @@
 #include "instruction/instruction.hpp"
 
 #include <cstdint>
-#include <vector>
 
 class Decoder {
 private:
@@ -15,7 +14,6 @@ private:
 
 public:
     static Instruction decode(std::uint32_t word);
-    static std::vector<Instruction> decodeProgram(const std::vector<std::uint32_t>& words);
 };
 
 #endif

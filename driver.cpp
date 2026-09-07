@@ -1,12 +1,9 @@
 #include "cpu/cpu.hpp"
-#include "decoder/decoder.hpp"
 #include "loader/program_loader.hpp"
 #include "program/program.hpp"
 
-#include <cstdint>
 #include <exception>
 #include <iostream>
-#include <vector>
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
@@ -15,9 +12,7 @@ int main(int argc, char* argv[]) {
     }
 
     try {
-        const std::vector<std::uint32_t> machineCode =
-            ProgramLoader::load(argv[1]);
-        const Program program(Decoder::decodeProgram(machineCode));
+        const Program program(ProgramLoader::load(argv[1]));
 
         Cpu cpu;
 

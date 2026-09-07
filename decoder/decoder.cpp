@@ -141,14 +141,3 @@ Instruction Decoder::decode(std::uint32_t word) {
 
     throw std::invalid_argument("unsupported instruction word");
 }
-
-std::vector<Instruction> Decoder::decodeProgram(const std::vector<std::uint32_t>& words) {
-    std::vector<Instruction> instructions;
-    instructions.reserve(words.size());
-
-    for (std::uint32_t word : words) {
-        instructions.push_back(decode(word));
-    }
-
-    return instructions;
-}

@@ -3,21 +3,21 @@
 #include <stdexcept>
 #include <utility>
 
-Program::Program(std::vector<Instruction> instructions)
-    : instructions(std::move(instructions)) {}
+Program::Program(std::vector<std::uint32_t> instructionWords)
+    : instructionWords(std::move(instructionWords)) {}
 
 bool Program::hasInstructionAt(std::uint32_t address) const {
     if (address % 4 != 0) {
         return false;
     }
 
-    return (address / 4) < instructions.size();
+    return (address / 4) < instructionWords.size();
 }
 
-const Instruction& Program::getInstructionAt(std::uint32_t address) const {
+std::uint32_t Program::getInstructionWordAt(std::uint32_t address) const {
     if (!hasInstructionAt(address)) {
         throw std::out_of_range("no instruction exists at this address");
     }
 
-    return instructions[address / 4];
+    return instructionWords[address / 4];
 }

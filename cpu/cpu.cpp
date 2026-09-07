@@ -2,6 +2,7 @@
 
 #include "alu/alu.hpp"
 #include "control/control_unit.hpp"
+#include "decoder/decoder.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -308,7 +309,8 @@ ExecutionResult Cpu::execute(const Instruction& instruction) {
 
 void Cpu::run(const Program& program, bool trace) {
     while (program.hasInstructionAt(pc)) {
-        const Instruction& instruction = program.getInstructionAt(pc);
+        const std::uint32_t instructionWord = program.getInstructionWordAt(pc);
+        const Instruction instruction = Decoder::decode(instructionWord);
         const ExecutionResult result = execute(instruction);
 
         if (trace) {
