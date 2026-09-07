@@ -5,6 +5,7 @@ Simulating RISC-V in C++ for my better understanding of c++ and computer archite
 
 - `simulator.cpp` starts the simulator and connects the parts together.
 - `alu/` contains arithmetic operations.
+- `control/` contains single-cycle control signal generation.
 - `cpu/` contains CPU state and execution behavior.
 - `decoder/` contains machine-code decoding for the supported RV32I subset.
 - `instruction/` contains the internal instruction model.
@@ -27,7 +28,8 @@ flowchart TD
     F --> I["Program counter (pc)"]
     F --> J["Fetch instruction using pc"]
     E --> J
-    J --> K["Cpu::execute"]
+    J --> M["Control Unit"]
+    M --> K["Cpu::execute"]
     K --> L["Alu"]
     K --> G
     K --> H
@@ -42,6 +44,21 @@ flowchart TD
 - The CPU also stores the program counter, usually called `pc`.
 - In RV32I, normal instructions are 4 bytes, so the default `pc` step is `pc += 4`.
 - The CPU asks the ALU to perform arithmetic, then writes the result back to a register.
+
+## Control unit notes
+
+- The control unit decides which datapath actions an instruction needs.
+- Example control signals include `RegWrite`, `MemRead`, `MemWrite`, `Branch`, and `Jump`.
+- In this project, the control unit is currently used in the trace to show how each instruction would drive a single-cycle datapath.
+
+## Single-cycle stage notes
+
+- `IF` fetches the instruction at the current `pc`.
+- `ID` decodes the instruction fields and produces control signals.
+- `EX` performs ALU work, comparisons, address calculation, or jump target calculation.
+- `MEM` reads or writes memory for load/store instructions.
+- `WB` writes the final result back to a register when needed.
+- `PC` updates the program counter for the next instruction.
 
 ## Instruction notes
 

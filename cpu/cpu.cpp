@@ -1,6 +1,7 @@
 #include "cpu/cpu.hpp"
 
 #include "alu/alu.hpp"
+#include "control/control_unit.hpp"
 
 #include <iostream>
 #include <stdexcept>
@@ -135,88 +136,114 @@ void Cpu::executeJalr(int rd, int rs1, std::int32_t immediate) {
 }
 
 void Cpu::traceExecution(const Instruction& instruction) const {
+    const ControlSignals signals = ControlUnit::generate(instruction.operation);
+
     std::cout << "pc " << pc << ": " << instruction.toString() << '\n';
+    std::cout << "  IF: fetch instruction at pc " << pc << '\n';
+    std::cout << "  ID: decode " << instruction.toString() << '\n';
+    std::cout << "  CTRL: RegWrite=" << signals.regWrite
+              << " MemRead=" << signals.memRead
+              << " MemWrite=" << signals.memWrite
+              << " Branch=" << signals.branch
+              << " Jump=" << signals.jump
+              << " ALUSrc=" << (signals.aluSrcImmediate ? "imm" : "reg")
+              << " ALU=" << signals.aluOperation
+              << " WB=" << signals.writeBackSource << '\n';
 
     switch (instruction.operation) {
         case Operation::ADD: {
             const std::uint32_t left = registers.read(instruction.rs1);
             const std::uint32_t right = registers.read(instruction.rs2);
             const std::uint32_t result = Alu::add(left, right);
-            std::cout << "  x" << instruction.rd << " = x" << instruction.rs1
-                      << "(" << left << ") + x" << instruction.rs2
-                      << "(" << right << ") = " << result << '\n';
+            std::cout << "  EX: x" << instruction.rs1 << "(" << left
+                      << ") + x" << instruction.rs2 << "(" << right
+                      << ") = " << result << '\n';
+            std::cout << "  MEM: no memory access" << '\n';
+            std::cout << "  WB: x" << instruction.rd << " = " << result << '\n';
             break;
         }
         case Operation::SUB: {
             const std::uint32_t left = registers.read(instruction.rs1);
             const std::uint32_t right = registers.read(instruction.rs2);
             const std::uint32_t result = Alu::subtract(left, right);
-            std::cout << "  x" << instruction.rd << " = x" << instruction.rs1
-                      << "(" << left << ") - x" << instruction.rs2
-                      << "(" << right << ") = " << result << '\n';
+            std::cout << "  EX: x" << instruction.rs1 << "(" << left
+                      << ") - x" << instruction.rs2 << "(" << right
+                      << ") = " << result << '\n';
+            std::cout << "  MEM: no memory access" << '\n';
+            std::cout << "  WB: x" << instruction.rd << " = " << result << '\n';
             break;
         }
         case Operation::ADDI: {
             const std::uint32_t left = registers.read(instruction.rs1);
             const std::uint32_t result =
                 Alu::add(left, static_cast<std::uint32_t>(instruction.immediate));
-            std::cout << "  x" << instruction.rd << " = x" << instruction.rs1
-                      << "(" << left << ") + " << instruction.immediate
-                      << " = " << result << '\n';
+            std::cout << "  EX: x" << instruction.rs1 << "(" << left
+                      << ") + " << instruction.immediate << " = " << result << '\n';
+            std::cout << "  MEM: no memory access" << '\n';
+            std::cout << "  WB: x" << instruction.rd << " = " << result << '\n';
             break;
         }
         case Operation::AND: {
             const std::uint32_t left = registers.read(instruction.rs1);
             const std::uint32_t right = registers.read(instruction.rs2);
             const std::uint32_t result = Alu::bitwiseAnd(left, right);
-            std::cout << "  x" << instruction.rd << " = x" << instruction.rs1
+            std::cout << "  EX: x" << instruction.rs1
                       << "(" << left << ") & x" << instruction.rs2
                       << "(" << right << ") = " << result << '\n';
+            std::cout << "  MEM: no memory access" << '\n';
+            std::cout << "  WB: x" << instruction.rd << " = " << result << '\n';
             break;
         }
         case Operation::OR: {
             const std::uint32_t left = registers.read(instruction.rs1);
             const std::uint32_t right = registers.read(instruction.rs2);
             const std::uint32_t result = Alu::bitwiseOr(left, right);
-            std::cout << "  x" << instruction.rd << " = x" << instruction.rs1
+            std::cout << "  EX: x" << instruction.rs1
                       << "(" << left << ") | x" << instruction.rs2
                       << "(" << right << ") = " << result << '\n';
+            std::cout << "  MEM: no memory access" << '\n';
+            std::cout << "  WB: x" << instruction.rd << " = " << result << '\n';
             break;
         }
         case Operation::XOR: {
             const std::uint32_t left = registers.read(instruction.rs1);
             const std::uint32_t right = registers.read(instruction.rs2);
             const std::uint32_t result = Alu::bitwiseXor(left, right);
-            std::cout << "  x" << instruction.rd << " = x" << instruction.rs1
+            std::cout << "  EX: x" << instruction.rs1
                       << "(" << left << ") ^ x" << instruction.rs2
                       << "(" << right << ") = " << result << '\n';
+            std::cout << "  MEM: no memory access" << '\n';
+            std::cout << "  WB: x" << instruction.rd << " = " << result << '\n';
             break;
         }
         case Operation::ANDI: {
             const std::uint32_t left = registers.read(instruction.rs1);
             const std::uint32_t result =
                 Alu::bitwiseAnd(left, static_cast<std::uint32_t>(instruction.immediate));
-            std::cout << "  x" << instruction.rd << " = x" << instruction.rs1
-                      << "(" << left << ") & " << instruction.immediate
-                      << " = " << result << '\n';
+            std::cout << "  EX: x" << instruction.rs1 << "(" << left
+                      << ") & " << instruction.immediate << " = " << result << '\n';
+            std::cout << "  MEM: no memory access" << '\n';
+            std::cout << "  WB: x" << instruction.rd << " = " << result << '\n';
             break;
         }
         case Operation::ORI: {
             const std::uint32_t left = registers.read(instruction.rs1);
             const std::uint32_t result =
                 Alu::bitwiseOr(left, static_cast<std::uint32_t>(instruction.immediate));
-            std::cout << "  x" << instruction.rd << " = x" << instruction.rs1
-                      << "(" << left << ") | " << instruction.immediate
-                      << " = " << result << '\n';
+            std::cout << "  EX: x" << instruction.rs1 << "(" << left
+                      << ") | " << instruction.immediate << " = " << result << '\n';
+            std::cout << "  MEM: no memory access" << '\n';
+            std::cout << "  WB: x" << instruction.rd << " = " << result << '\n';
             break;
         }
         case Operation::XORI: {
             const std::uint32_t left = registers.read(instruction.rs1);
             const std::uint32_t result =
                 Alu::bitwiseXor(left, static_cast<std::uint32_t>(instruction.immediate));
-            std::cout << "  x" << instruction.rd << " = x" << instruction.rs1
-                      << "(" << left << ") ^ " << instruction.immediate
-                      << " = " << result << '\n';
+            std::cout << "  EX: x" << instruction.rs1 << "(" << left
+                      << ") ^ " << instruction.immediate << " = " << result << '\n';
+            std::cout << "  MEM: no memory access" << '\n';
+            std::cout << "  WB: x" << instruction.rd << " = " << result << '\n';
             break;
         }
         case Operation::LW: {
@@ -224,10 +251,10 @@ void Cpu::traceExecution(const Instruction& instruction) const {
             const std::uint32_t address =
                 Alu::add(base, static_cast<std::uint32_t>(instruction.immediate));
             const std::uint32_t value = memory.readWord(address);
-            std::cout << "  address = x" << instruction.rs1 << "(" << base
+            std::cout << "  EX: address = x" << instruction.rs1 << "(" << base
                       << ") + " << instruction.immediate << " = " << address << '\n';
-            std::cout << "  x" << instruction.rd << " = memory[" << address
-                      << "] = " << value << '\n';
+            std::cout << "  MEM: read memory[" << address << "] = " << value << '\n';
+            std::cout << "  WB: x" << instruction.rd << " = " << value << '\n';
             break;
         }
         case Operation::SW: {
@@ -235,10 +262,11 @@ void Cpu::traceExecution(const Instruction& instruction) const {
             const std::uint32_t address =
                 Alu::add(base, static_cast<std::uint32_t>(instruction.immediate));
             const std::uint32_t value = registers.read(instruction.rs2);
-            std::cout << "  address = x" << instruction.rs1 << "(" << base
+            std::cout << "  EX: address = x" << instruction.rs1 << "(" << base
                       << ") + " << instruction.immediate << " = " << address << '\n';
-            std::cout << "  memory[" << address << "] = x" << instruction.rs2
+            std::cout << "  MEM: memory[" << address << "] = x" << instruction.rs2
                       << "(" << value << ")" << '\n';
+            std::cout << "  WB: no register write" << '\n';
             break;
         }
         case Operation::BEQ: {
@@ -248,10 +276,12 @@ void Cpu::traceExecution(const Instruction& instruction) const {
             const std::uint32_t nextPc = taken
                 ? static_cast<std::uint32_t>(static_cast<std::int32_t>(pc) + instruction.immediate)
                 : pc + 4;
-            std::cout << "  compare x" << instruction.rs1 << "(" << left
+            std::cout << "  EX: compare x" << instruction.rs1 << "(" << left
                       << ") == x" << instruction.rs2 << "(" << right
                       << "): " << (taken ? "true" : "false") << '\n';
-            std::cout << "  pc -> " << nextPc << '\n';
+            std::cout << "  MEM: no memory access" << '\n';
+            std::cout << "  WB: no register write" << '\n';
+            std::cout << "  PC: pc -> " << nextPc << '\n';
             return;
         }
         case Operation::BNE: {
@@ -261,19 +291,24 @@ void Cpu::traceExecution(const Instruction& instruction) const {
             const std::uint32_t nextPc = taken
                 ? static_cast<std::uint32_t>(static_cast<std::int32_t>(pc) + instruction.immediate)
                 : pc + 4;
-            std::cout << "  compare x" << instruction.rs1 << "(" << left
+            std::cout << "  EX: compare x" << instruction.rs1 << "(" << left
                       << ") != x" << instruction.rs2 << "(" << right
                       << "): " << (taken ? "true" : "false") << '\n';
-            std::cout << "  pc -> " << nextPc << '\n';
+            std::cout << "  MEM: no memory access" << '\n';
+            std::cout << "  WB: no register write" << '\n';
+            std::cout << "  PC: pc -> " << nextPc << '\n';
             return;
         }
         case Operation::JAL: {
             const std::uint32_t returnAddress = pc + 4;
             const std::uint32_t nextPc =
                 static_cast<std::uint32_t>(static_cast<std::int32_t>(pc) + instruction.immediate);
-            std::cout << "  x" << instruction.rd << " = return address "
+            std::cout << "  EX: target = pc(" << pc << ") + "
+                      << instruction.immediate << " = " << nextPc << '\n';
+            std::cout << "  MEM: no memory access" << '\n';
+            std::cout << "  WB: x" << instruction.rd << " = return address "
                       << returnAddress << '\n';
-            std::cout << "  pc -> " << nextPc << '\n';
+            std::cout << "  PC: pc -> " << nextPc << '\n';
             return;
         }
         case Operation::JALR: {
@@ -282,19 +317,20 @@ void Cpu::traceExecution(const Instruction& instruction) const {
                 Alu::add(base, static_cast<std::uint32_t>(instruction.immediate));
             const std::uint32_t nextPc = rawTarget & ~1u;
             const std::uint32_t returnAddress = pc + 4;
-            std::cout << "  x" << instruction.rd << " = return address "
-                      << returnAddress << '\n';
-            std::cout << "  target = (x" << instruction.rs1 << "(" << base
+            std::cout << "  EX: target = (x" << instruction.rs1 << "(" << base
                       << ") + " << instruction.immediate << ") & ~1 = "
                       << nextPc << '\n';
-            std::cout << "  pc -> " << nextPc << '\n';
+            std::cout << "  MEM: no memory access" << '\n';
+            std::cout << "  WB: x" << instruction.rd << " = return address "
+                      << returnAddress << '\n';
+            std::cout << "  PC: pc -> " << nextPc << '\n';
             return;
         }
         default:
             throw std::invalid_argument("unsupported instruction operation");
     }
 
-    std::cout << "  pc -> " << pc + 4 << '\n';
+    std::cout << "  PC: pc -> " << pc + 4 << '\n';
 }
 
 void Cpu::execute(const Instruction& instruction) {
