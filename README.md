@@ -9,8 +9,10 @@ Simulating RISC-V in C++ for my better understanding of c++ and computer archite
 - `cpu/` contains CPU state and execution behavior.
 - `decoder/` contains machine-code decoding for the supported RV32I subset.
 - `instruction/` contains the internal instruction model.
+- `loader/` reads machine-code words from a program file.
 - `memory/` contains simulated byte-addressed memory.
 - `program/` contains instruction storage and fetch by address.
+- `examples/` contains machine-code programs that can be run by the simulator.
 - `register/` contains the register file.
 - `Makefile` builds and runs the project with simple commands.
 
@@ -18,7 +20,8 @@ Simulating RISC-V in C++ for my better understanding of c++ and computer archite
 
 ```mermaid
 flowchart TD
-    A["simulator.cpp"] --> B["Machine-code words"]
+    A["simulator.cpp"] --> B["ProgramLoader"]
+    N["Machine-code file"] --> B
     B --> C["Decoder"]
     C --> D["Instruction objects"]
     D --> E["Program"]
@@ -79,6 +82,12 @@ flowchart TD
 - `jal` is a J-type jump instruction that stores `pc + 4` in `rd`.
 - `jalr` is an I-type register jump that computes its target from `rs1 + immediate`.
 - Unsupported instruction words throw an error for now.
+
+## Loader notes
+
+- `ProgramLoader` reads one hexadecimal 32-bit instruction from each non-empty line.
+- It produces raw machine-code words; decoding remains the decoder's responsibility.
+- The simulator currently loads `examples/basic_program.txt`.
 
 ## Memory notes
 
