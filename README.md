@@ -1,147 +1,183 @@
-# RISC-V-simulation
-Simulating RISC-V in C++ for my better understanding of c++ and computer architecture.
+# RISC-V RV32I Simulator
 
-## Current structure
+A modular C++17 simulator for a learning-focused subset of the RISC-V RV32I
+instruction set architecture. The project models instruction loading, fetch,
+decode, execution, memory access, register write-back, and program-counter
+updates using a single-cycle execution model.
 
-- `driver.cpp` starts the simulator and connects the parts together.
-- `alu/` contains arithmetic operations.
-- `control/` contains single-cycle control signal generation.
-- `cpu/` contains CPU state and execution behavior.
-- `decoder/` contains machine-code decoding for the supported RV32I subset.
-- `instruction/` contains the internal instruction model.
-- `loader/` reads machine-code words from a program file.
-- `memory/` contains simulated byte-addressed memory.
-- `program/` contains instruction storage and fetch by address.
-- `examples/` contains machine-code programs that can be run by the simulator.
-- `register/` contains the register file.
-- `Makefile` builds and runs the project with simple commands.
+> **Project status:** The single-cycle simulator is functional for the
+> instructions listed below. A pipelined CPU model is planned as a separate
+> implementation.
 
-## Execution flow
+## Features
+
+- Loads 32-bit machine-code words from a hexadecimal text file.
+- Decodes R-, I-, S-, B-, and J-type instruction formats at runtime.
+- Models all 32 RV32I integer registers, including the hardwired `x0` register.
+- Provides a byte-addressed memory with aligned 32-bit word reads and writes.
+- Executes arithmetic, logical, memory, branch, and jump instructions.
+- Generates single-cycle control signals for each supported operation.
+- Prints an `IF`, `ID`, `EX`, `MEM`, and `WB` execution trace.
+- Reports invalid input files and unsupported instructions through the driver.
+
+## Supported Instructions
+
+| Category | Instructions |
+| --- | --- |
+| Arithmetic | `add`, `sub`, `addi` |
+| Logical | `and`, `or`, `xor`, `andi`, `ori`, `xori` |
+| Memory | `lw`, `sw` |
+| Branch | `beq`, `bne` |
+| Jump | `jal`, `jalr` |
+
+## Architecture
 
 ```mermaid
-flowchart TD
-    A["driver.cpp"] --> B["ProgramLoader"]
-    N["Machine-code file"] --> B
-    B --> E["Program with raw instruction words"]
-    A --> F["Cpu"]
-    F --> G["Registers"]
-    F --> H["Memory"]
-    F --> I["Program counter (pc)"]
-    F --> J["Fetch instruction word using pc"]
-    E --> J
-    J --> C["Decoder"]
-    C --> D["Instruction object"]
-    D --> M["Control Unit"]
-    M --> K["Cpu::execute"]
-    K --> L["Alu"]
-    K --> G
-    K --> H
-    K --> I
-    I --> J
+flowchart LR
+    File["Hex machine-code file"] --> Loader["ProgramLoader"]
+    Loader --> Program["Program: raw 32-bit words"]
+    Program --> Fetch["IF: fetch using PC"]
+    Fetch --> Decoder["ID: Decoder"]
+    Decoder --> Instruction["Decoded Instruction"]
+    Instruction --> Execute["CPU execution"]
+    Instruction --> Control["Control signals"]
+    Execute --> ALU["EX: ALU"]
+    Execute --> Memory["MEM: data memory"]
+    Execute --> Registers["WB: register file"]
+    Execute --> PC["PC update"]
+    Control --> Trace["Execution trace"]
+    Execute --> Trace
+    PC --> Fetch
 ```
 
-## CPU notes
+The `Program` stores raw machine-code words. During execution, the CPU fetches
+one word using the program counter and passes it to the decoder. The CPU
+dispatches the resulting instruction to the appropriate ALU, memory, register,
+and PC behavior. The control unit generates the corresponding datapath signals
+for the execution trace.
 
-- The CPU owns the register file.
-- The CPU owns simulated memory.
-- The CPU also stores the program counter, usually called `pc`.
-- In RV32I, normal instructions are 4 bytes, so the default `pc` step is `pc += 4`.
-- The CPU asks the ALU to perform arithmetic, then writes the result back to a register.
+This is currently a sequential single-cycle model: one instruction completes
+all five logical stages before the next instruction is fetched. The stage trace
+describes datapath activity; it does not yet represent overlapping pipeline
+stages.
 
-## Control unit notes
+## Project Structure
 
-- The control unit decides which datapath actions an instruction needs.
-- Example control signals include `RegWrite`, `MemRead`, `MemWrite`, `Branch`, and `Jump`.
-- In this project, the control unit is currently used in the trace to show how each instruction would drive a single-cycle datapath.
+```text
+.
+|-- alu/           Arithmetic and bitwise operations
+|-- control/       Control-signal generation
+|-- cpu/           CPU state, execution, and tracing
+|-- decoder/       RV32I machine-code decoding
+|-- examples/      Example hexadecimal programs
+|-- instruction/   Internal decoded-instruction model
+|-- loader/        Machine-code file loading and validation
+|-- memory/        Byte-addressed data memory
+|-- program/       Raw instruction storage and PC-based fetch
+|-- register/      RV32I integer register file
+|-- driver.cpp     Command-line entry point and orchestration
+`-- Makefile       Build and run commands
+```
 
-## Single-cycle stage notes
+## Building
 
-- `IF` fetches the instruction at the current `pc`.
-- `ID` decodes the instruction fields and produces control signals.
-- `EX` performs ALU work, comparisons, address calculation, or jump target calculation.
-- `MEM` reads or writes memory for load/store instructions.
-- `WB` writes the final result back to a register when needed.
-- `PC` updates the program counter for the next instruction.
-- Each executed instruction produces an `ExecutionResult`, which stores the important datapath outputs used by the trace.
+### Requirements
 
-## Instruction notes
+- A C++17-compatible compiler (`clang++` is used by the Makefile)
+- GNU Make
 
-- An instruction describes one operation the CPU should perform.
-- `addi` uses a signed immediate, so values like `-5` are allowed.
-- The decoder turns real machine-code bits into this instruction structure.
-
-## Decoder notes
-
-- The decoder currently supports `add`, `sub`, `addi`, `and`, `or`, `xor`, `andi`, `ori`, `xori`, `lw`, `sw`, `beq`, `bne`, `jal`, and `jalr`.
-- The CPU calls the decoder after fetching one raw instruction word from the program.
-- `add` and `sub` are R-type instructions.
-- `addi` is an I-type instruction with a signed 12-bit immediate.
-- `and`, `or`, and `xor` are R-type logical instructions.
-- `andi`, `ori`, and `xori` are I-type logical instructions.
-- `lw` is an I-type load instruction, and `sw` is an S-type store instruction.
-- `beq` and `bne` are B-type branch instructions with signed offsets.
-- `jal` is a J-type jump instruction that stores `pc + 4` in `rd`.
-- `jalr` is an I-type register jump that computes its target from `rs1 + immediate`.
-- Unsupported instruction words throw an error for now.
-
-## Loader notes
-
-- `ProgramLoader` reads one hexadecimal 32-bit instruction from each non-empty line.
-- It produces raw machine-code words; decoding remains the decoder's responsibility.
-- The driver receives the program file path and passes it to the loader.
-
-## Driver notes
-
-- `driver.cpp` is the driver because it connects the loader, program, and CPU.
-- It catches errors from these components and displays them without abruptly terminating.
-- The simulator expects one program file path as a command-line argument.
-
-## Memory notes
-
-- Memory is byte-addressed, meaning each address points to one byte.
-- `lw` loads 4 bytes from memory into a register.
-- `sw` stores 4 bytes from a register into memory.
-- For now, word addresses must be divisible by 4.
-
-## Program notes
-
-- A program stores raw 32-bit machine-code words in order.
-- The CPU uses `pc` as an address, so word `0` is at address `0`, word `1` is at address `4`, word `2` is at address `8`, and so on.
-- `Cpu::run(...)` keeps fetching and executing instructions until there is no instruction at the current `pc`.
-- Passing `true` to `Cpu::run(program, true)` enables a trace that prints each fetched instruction and its effect.
-
-## ALU notes
-
-- ALU means arithmetic logic unit.
-- For now, this project supports arithmetic and basic bitwise logic.
-
-## Register file notes
-
-- RV32I has 32 integer registers: `x0` to `x31`.
-- `x0` is hardwired to zero, so writes to `x0` are ignored.
-- Registers also have ABI names, such as `zero`, `ra`, `sp`, `a0`, and `t0`.
-
-## Build and run
+Build the simulator from the project root:
 
 ```bash
 make
+```
+
+The executable is created at `build/simulator`.
+
+## Running
+
+Run the bundled example program:
+
+```bash
 make run
 ```
 
-`make run` uses `examples/basic_program.txt` by default. To run another program:
+Run a different program through Make:
 
 ```bash
 make run PROGRAM=path/to/program.txt
 ```
 
-You can also run the executable directly:
+Or invoke the executable directly:
 
 ```bash
 ./build/simulator examples/basic_program.txt
 ```
 
-To remove generated build files:
+Remove generated build files with:
 
 ```bash
 make clean
 ```
+
+## Program Input Format
+
+Input files contain one hexadecimal 32-bit instruction per non-empty line:
+
+```text
+002081b3
+40110233
+06408293
+```
+
+Instructions are stored from address `0` onward in 4-byte steps. Blank lines
+are ignored. Any other text on an instruction line is currently rejected.
+
+The bundled driver initializes `x1` to `10`, `x2` to `20`, and `x7` to `100`
+before execution so that `examples/basic_program.txt` can demonstrate register
+arithmetic and memory access.
+
+## Execution Trace
+
+Trace output shows the work performed for every instruction:
+
+```text
+pc 0: add x3, x1, x2
+  IF: fetch instruction at pc 0
+  ID: decode add x3, x1, x2
+  CTRL: RegWrite=1 MemRead=0 MemWrite=0 Branch=0 Jump=0 ALUSrc=reg ALU=ADD WB=ALU
+  EX: x1(10) + x2(20) = 30
+  MEM: no memory access
+  WB: x3 = 30
+  PC: pc -> 4
+```
+
+After execution, the simulator prints the final program counter and all integer
+register values using both architectural and ABI register names.
+
+## Current Limitations
+
+- The simulator implements a subset of RV32I rather than the complete ISA.
+- Pipeline overlap, forwarding, stalls, and hazard handling are not implemented.
+- Control signals are exposed for tracing; execution is currently dispatched by
+  the CPU's instruction-operation logic.
+- The CPU currently uses the default 1024-byte data memory.
+- `lw` and `sw` require addresses aligned to 4-byte boundaries.
+- The input format accepts hexadecimal machine code, not assembly source or ELF
+  binaries.
+
+## Roadmap
+
+- Add explicit pipeline registers: `IF/ID`, `ID/EX`, `EX/MEM`, and `MEM/WB`.
+- Introduce a separate pipelined CPU while retaining the single-cycle model as a
+  reference implementation.
+- Add data-hazard detection, stalls, forwarding, and control-hazard flushing.
+- Expand instruction coverage toward the complete RV32I base instruction set.
+- Add automated unit and integration tests.
+
+## Purpose
+
+This project is being developed to study how RISC-V machine instructions move
+through a CPU and to practice modular C++ design. It prioritizes clear component
+boundaries and observable execution behavior over cycle-accurate hardware
+simulation.
